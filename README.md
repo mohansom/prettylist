@@ -1,6 +1,7 @@
 # prettylist
 
-A simple Python library for easily displaying tabular data in a visually appealing ASCII list format
+A simple Python library for easily displaying tabular data in a visually appealing ASCII list format.
+Does not use any dependent, include **built-in** packages
 
 # usage
 
