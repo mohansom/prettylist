@@ -9,11 +9,13 @@ pip install prettylist
 ```
 
 ```python
-p = PrettyList([
-    Column(header='City name'),
-    Column(header='Area', fmt=F_RIGHT),
-    Column(header='Population'),
-    Column(header='Annual Rainfall')
+import prettylist
+
+p = prettylist.PrettyList([
+    prettylist.Column(header='City name'),
+    prettylist.Column(header='Area', fmt=prettylist.F_RIGHT),
+    prettylist.Column(header='Population'),
+    prettylist.Column(header='Annual Rainfall')
 ], noheader=False, sort='City name', sep=' | ')
 
 p.add_row(['Adelaide', 1295, 1158259, 600.5])
