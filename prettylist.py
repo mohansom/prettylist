@@ -14,7 +14,7 @@
 
 'A simple Python library for easily displaying tabular data in a visually appealing ASCII table format'
 
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 
 F_LEFT = 'F_LEFT'
 F_CENTER = 'F_CENTER'
@@ -52,6 +52,7 @@ class PrettyList:
         if not isinstance(columns, (list, tuple)) or len(columns) == 0:
             raise ValueError('invalid columns: %s' % columns)
         self.columns = columns
+        self.columns_headers = [c.header for c in self.columns]
         self.rows = []
         self.noheader = noheader
         self.sort = sort
@@ -62,28 +63,31 @@ class PrettyList:
     def __str__(self):
         return self[:]
 
-    def __iter__(self):
-        # Calculation of the width of the column will contain the header.
+    def __getitem__(self, index):
+        """Return a string by self[start:stop:step]"""
+        if self.sort:
+            pos = self.columns_headers.index(self.sort)
+            self.rows.sort(key=lambda _: _[pos], reverse=self.reverse)
+
+        subrows = self.rows[index]
+        if isinstance(index, int):
+            subrows = [subrows]
+
+        for row in subrows:
+            for index, entry in enumerate(row):
+                self.columns[index].width = max(self.columns[index].width, len(convert_to_string(entry)))
         if not self.noheader:
             for column in self.columns:
                 column.width = max(column.width, len(column.header))
-        # Sort rows if necessary.
-        if self.sort:
-            index = [c.header for c in self.columns].index(self.sort)
-            self.rows.sort(key=lambda _: _[index], reverse=self.reverse)
-        for row in self.rows:
-            yield self._generate_line(row)
 
-    def __getitem__(self, index):
-        """Return a string by self[start:stop:step]"""
-        lines = list(self)
-        sublines = lines[index]
-        if isinstance(index, int):
-            sublines = [sublines]
+        lines = []
         if not self.noheader:
-            sublines.insert(0, self._generate_line([column.width * '-' for column in self.columns]))
-            sublines.insert(0, self._generate_line([c.header for c in self.columns]))
-        return self.linesep.join(sublines)
+            lines.append(self._generate_line(self.columns_headers))
+            lines.append(self._generate_line([column.width * '-' for column in self.columns]))
+        for row in subrows:
+            lines.append(self._generate_line(row))
+
+        return self.linesep.join(lines)
 
     def _generate_line(self, row):
         """Return a formatted string of row by columns"""
@@ -112,8 +116,6 @@ class PrettyList:
         if len(row) > len(self.columns):
             raise ValueError('invalid row: %s' % row)
         self.rows.append(row)
-        for index, entry in enumerate(row):
-            self.columns[index].width = max(self.columns[index].width, len(convert_to_string(entry)))
 
 
 def convert_to_string(instance):
@@ -126,7 +128,7 @@ if __name__ == '__main__':
         Column(header='Area', fmt=F_RIGHT),
         Column(header='Population'),
         Column(header='Annual Rainfall')
-    ], noheader=False, sort='City name', sep=' | ')
+    ], noheader=True, sort='City name', sep=' | ')
 
     p.add_row(['Adelaide', 1295, 1158259, 600.5])
     p.add_row(['Brisbane', 5905, 1857594, 1146.4])
@@ -136,4 +138,4 @@ if __name__ == '__main__':
     p.add_row(['Melbourne', 1566, 3806092, 646.9])
     p.add_row(['Perth', 5386, 1554769, 869.4])
 
-    print(p[:3])
+    print(p)
