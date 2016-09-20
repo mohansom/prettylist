@@ -14,7 +14,7 @@
 
 'A simple Python library for easily displaying tabular data in a visually appealing ASCII table format'
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
 F_LEFT = 'F_LEFT'
 F_CENTER = 'F_CENTER'
@@ -54,28 +54,36 @@ class PrettyList:
         self.columns = columns
         self.rows = []
         self.noheader = noheader
-        if not self.noheader:
-            for column in self.columns:
-                column.width = len(column.header)
-        else:
-            for column in self.columns:
-                column.width = 0
         self.sort = sort
         self.reverse = reverse
         self.sep = sep
         self.linesep = linesep
 
     def __str__(self):
-        return self.linesep.join(self)
+        return self[:]
 
     def __iter__(self):
+        # Calculation of the width of the column will contain the header.
+        if not self.noheader:
+            for column in self.columns:
+                column.width = max(column.width, len(column.header))
+        # Sort rows if necessary.
         if self.sort:
             index = [c.header for c in self.columns].index(self.sort)
             self.rows.sort(key=lambda _: _[index], reverse=self.reverse)
-        if not self.noheader:
-            yield self._generate_line([c.header for c in self.columns])
         for row in self.rows:
             yield self._generate_line(row)
+
+    def __getitem__(self, index):
+        """Return a string by self[start:stop:step]"""
+        lines = list(self)
+        sublines = lines[index]
+        if isinstance(index, int):
+            sublines = [sublines]
+        if not self.noheader:
+            sublines.insert(0, self._generate_line([column.width * '-' for column in self.columns]))
+            sublines.insert(0, self._generate_line([c.header for c in self.columns]))
+        return self.linesep.join(sublines)
 
     def _generate_line(self, row):
         """Return a formatted string of row by columns"""
@@ -111,6 +119,7 @@ class PrettyList:
 def convert_to_string(instance):
     return str(instance)
 
+
 if __name__ == '__main__':
     p = PrettyList([
         Column(header='City name'),
@@ -118,6 +127,7 @@ if __name__ == '__main__':
         Column(header='Population'),
         Column(header='Annual Rainfall')
     ], noheader=False, sort='City name', sep=' | ')
+
     p.add_row(['Adelaide', 1295, 1158259, 600.5])
     p.add_row(['Brisbane', 5905, 1857594, 1146.4])
     p.add_row(['Darwin', 112, 120900, 1714.7])
@@ -125,4 +135,5 @@ if __name__ == '__main__':
     p.add_row(['Sydney', 2058, 4336374, 1214.8])
     p.add_row(['Melbourne', 1566, 3806092, 646.9])
     p.add_row(['Perth', 5386, 1554769, 869.4])
-    print(p)
+
+    print(p[:3])
