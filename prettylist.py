@@ -128,7 +128,7 @@ if __name__ == '__main__':
         Column(header='Area', fmt=F_RIGHT),
         Column(header='Population'),
         Column(header='Annual Rainfall')
-    ], noheader=True, sort='City name', sep=' | ')
+    ], noheader=False, sort='City name', sep=' | ')
 
     p.add_row(['Adelaide', 1295, 1158259, 600.5])
     p.add_row(['Brisbane', 5905, 1857594, 1146.4])
