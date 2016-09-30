@@ -14,25 +14,20 @@
 
 'A simple Python library for easily displaying tabular data in a visually appealing ASCII table format'
 
-__version__ = '0.1.9'
-
-F_LEFT = 'F_LEFT'
-F_CENTER = 'F_CENTER'
-F_RIGHT = 'F_RIGHT'
-F_DEFAULT = 'F_DEFAULT'
+__version__ = '0.2.0'
 
 
 class Column:
     """Return a new Column instance.
 
     :param header: string of the name of column
-    :param fmt: the describe of alignment. F_LEFT for left, F_CENTER for centre, F_RIGHT for right and F_DEFAULT for automatically selects the best
+    :param fmt: the describe of alignment. '<' for left, '-' for centre, '>' for right and None for automatically selects the best
     """
 
-    def __init__(self, header, fmt=F_DEFAULT):
+    def __init__(self, header, fmt=None):
         self.header = header
         self.fmt = fmt
-        if self.fmt not in [F_LEFT, F_CENTER, F_RIGHT, F_DEFAULT]:
+        if self.fmt not in ['<', '-', '>', None]:
             raise ValueError('invalid fmt: %s' % self.fmt)
         self.width = 0
 
@@ -96,12 +91,12 @@ class PrettyList:
         for index, entry in enumerate(row[:-1]):
             column = self.columns[index]
             fmt = column.fmt
-            if fmt == F_DEFAULT:
-                fmt = F_LEFT if index == 0 else F_RIGHT
+            if fmt is None:
+                fmt = '<' if index == 0 else '>'
             unit = {
-                F_LEFT: str.ljust,
-                F_CENTER: str.center,
-                F_RIGHT: str.rjust
+                '<': str.ljust,
+                '-': str.center,
+                '>': str.rjust
             }.get(fmt)(entry, column.width)
             units.append(unit)
         units.append(row[-1])
@@ -125,10 +120,10 @@ def convert_to_string(instance):
 if __name__ == '__main__':
     p = PrettyList([
         Column(header='City name'),
-        Column(header='Area', fmt=F_RIGHT),
+        Column(header='Area'),
         Column(header='Population'),
         Column(header='Annual Rainfall')
-    ], noheader=False, sort='City name', sep=' | ')
+    ], noheader=False, sort='Annual Rainfall', reverse=True, sep=' | ')
 
     p.add_row(['Adelaide', 1295, 1158259, 600.5])
     p.add_row(['Brisbane', 5905, 1857594, 1146.4])
@@ -138,4 +133,4 @@ if __name__ == '__main__':
     p.add_row(['Melbourne', 1566, 3806092, 646.9])
     p.add_row(['Perth', 5386, 1554769, 869.4])
 
-    print(p)
+    print(p[:5])
