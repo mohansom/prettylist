@@ -21,7 +21,7 @@ class Column:
     """Return a new Column instance.
 
     :param header: string of the name of column
-    :param fmt: the describe of alignment. '<' for left, '-' for center, '>' for right and None for automatically selects the best
+    :param fmt: the describe of alignment. '<' for left, '-' for centre, '>' for right and None for automatically selects the best
     """
 
     def __init__(self, header, fmt=None):
@@ -103,7 +103,7 @@ class PrettyList:
         return self.sep.join(units)
 
     def add_row(self, row):
-        """Add a row to the list. If the header has been set, the length of data
+        """Add a row to the list. If the header has been set, the length of date
         should be consistent with header.
 
         :param row: list or tuple of data
